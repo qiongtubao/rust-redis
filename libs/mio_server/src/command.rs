@@ -34,6 +34,7 @@ impl Command {
     pub fn ok() -> Command {
         command!("Ok".to_string())
     }
+    pub fn nil() -> Command {command!("nil".to_string())}
     pub fn arg(&mut self, v: String) {
         self.argv.push(v);
     }
