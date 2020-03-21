@@ -12,11 +12,13 @@ use mio_server::command::Command;
 use mio_server::db::Db;
 use mio_server::object::Object;
 
- mod kv;
+mod kv;
+mod hash;
 fn main() {
     let mut s =  mio_server::Server::new("127.0.0.1", 6379);
     s.init();
     kv::route(&mut s);
+    hash::route(&mut s);
     s.run();
     // a();
 }

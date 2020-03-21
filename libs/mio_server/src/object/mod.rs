@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
 pub enum Object {
-    String(String)
+    String(String),
+    Hash(HashMap<String,String>)
 }

@@ -10,18 +10,44 @@ impl Db {
             data: HashMap::new()
         }
     }
-    pub fn set(&mut self, key: String, value: Object) {
-        self.data.insert(key, value);
+    pub fn set(&mut self, key: String, value: Object) -> Option<Object>{
+        self.data.insert(key, value)
     }
     pub fn get(&self, key: &String)-> Option<&Object> {
         self.data.get(key)
+    }
+    pub fn get_mut(&mut self, key: &String) -> Option<&mut Object> {
+        self.data.get_mut(key)
     }
     pub fn get_string(&self, key: &String) -> Option<&String> {
         if let Some(x) =  self.data.get(key) {
             match  x  {
                 Object::String(d) => {
                     return Some(d)
-                }
+                },
+                _ =>{}
+            }
+        }
+        None
+    }
+    pub fn get_hash(&self, key: &String) -> Option<&HashMap<String, String>> {
+        if let Some(x) =  self.data.get(key) {
+            match  x  {
+                Object::Hash(d) => {
+                    return Some(d)
+                },
+                _ =>{}
+            }
+        }
+        None
+    }
+    pub fn get_mut_hash(&mut self, key: &String) -> Option<&mut HashMap<String, String>> {
+        if let Some(x) = self.data.get_mut(key) {
+            match x {
+                Object::Hash(d) => {
+                    return Some(d)
+                },
+                _ => {}
             }
         }
         None
