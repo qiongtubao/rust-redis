@@ -14,11 +14,13 @@ use mio_server::object::Object;
 
 mod kv;
 mod hash;
+mod list;
 fn main() {
     let mut s =  mio_server::Server::new("127.0.0.1", 6379);
     s.init();
     kv::route(&mut s);
     hash::route(&mut s);
+    list::route(&mut s);
     s.run();
     // a();
 }

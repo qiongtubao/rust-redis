@@ -47,6 +47,9 @@ impl Command {
     pub fn getArgc(&self, index: usize) -> &String {
         self.argv.get(index).expect("get cmd")
     }
+    pub fn getInt(&self, index: usize) -> u64 {
+        self.getArgc(index).parse::<u64>().unwrap()
+    }
     #[allow(unused_variables)]
     pub fn write<'a>(&self, write:  &'a mut Write) -> std::io::Result<()>{
         write.write_all(b"*")?;

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use crate::object::Object;
+use crate::object::list::List;
 
 pub struct Db {
     data: HashMap<String, Object>
@@ -37,6 +38,17 @@ impl Db {
                     return Some(d)
                 },
                 _ =>{}
+            }
+        }
+        None
+    }
+    pub fn get_list(&self, key: &String) -> Option<&List<String>> {
+        if let Some(x) = self.data.get(key) {
+            match x {
+                Object::List(d) => {
+                    return Some(d)
+                },
+                _ => {}
             }
         }
         None
