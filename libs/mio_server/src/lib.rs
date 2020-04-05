@@ -4,21 +4,24 @@ use mio::{Events, Interest, Poll, Registry, Token};
 use mio::net::{TcpListener, TcpStream};
 use std::str::from_utf8;
 use std::io::Read;
-use mio::event::Event;
+use mio::event::{Event, Source};
 use std::io;
 use crate::handles::Handle;
 use std::error::Error;
 use crate::command::Command;
 use crate::db::Db;
+use crate::timer::{Interval, INTERVAL_TOKEN};
 
 pub mod handles;
 #[macro_export]
 pub mod command;
 pub mod db;
 pub mod object;
+pub mod config;
+pub mod timer;
 
-const SERVER: Token = Token(0);
-const CLIENT: Token = Token(1);
+const SERVER: Token = Token(1);
+const CLIENT: Token = Token(2);
 pub struct Server<'a> {
     port: u64,
     host: String,
@@ -28,6 +31,14 @@ pub struct Server<'a> {
     server: Option<TcpListener>,
     db: Db,
     poll: Option<Poll>,
+//    pubsub_channels: HashMap<String, String>,
+//    pubsub_patterns: Vec<String>,
+//    lastsave: u64,
+//    rdb_save_time_last: u64,
+//    rdb_save_time_start: u64,
+//    dirty: u64,
+//    aof_filename:
+
 }
 
 impl<'a> Server<'a> {
@@ -143,6 +154,15 @@ impl<'a> Server<'a> {
 
         Ok(None)
     }
+    fn is_master(&self) -> bool {
+        true
+    }
+
+    fn databasesCron(&mut self) {
+        if(self.is_master()) {
+            self.db.activeExpireCycle();
+        }
+    }
     pub fn run(&mut self) -> Result<(), Box<dyn Error>>  {
         // Create a poll instance.
         let mut poll = Poll::new()?;
@@ -165,6 +185,10 @@ impl<'a> Server<'a> {
         // Unique token for each incoming connection.
         let mut unique_token = Token(SERVER.0 + 1);
         // Start an event loop.
+        let mut timer = Interval::new(5000);
+        poll.registry()
+            .register(&mut timer, INTERVAL_TOKEN, Interest::READABLE | Interest::WRITABLE).unwrap();
+//        timer.register(poll.registry(), INTERVAL_TOKEN, Interest::READABLE | Interest::WRITABLE);
         loop {
             // Poll Mio for events, blocking until we get an event.
             poll.poll(&mut events, None)?;
@@ -189,6 +213,9 @@ impl<'a> Server<'a> {
                         )?;
 
                         connections.insert(token, connection);
+                    }
+                    INTERVAL_TOKEN => {
+                        self.databasesCron();
                     }
                     token => {
                         let done = if let Some(connection) = connections.get_mut(&token) {
